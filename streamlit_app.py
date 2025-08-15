@@ -67,7 +67,7 @@ for i in range(0, len(popular_df), 5):  # 5 books per row
             # Always show book info
             col.markdown(f"**{book['Book-Title']}**")
             col.caption(f"Author: {book['Book-Author']}")
-            col.write(f"⭐ {book['avg_rating']:.2f}  |  📈 {book['num_ratings']} ratings")
+            col.write(f"⭐ {book['Avg_rating']:.2f}  |  📈 {book['Num_Ratings']} ratings")
 
 # Tab 2 - Recommend Books
 with tab2:
@@ -88,6 +88,7 @@ with tab2:
                 st.warning("No similar books found. Please check the spelling or try another title.")
         else:
             st.error("Please enter a book title.")
+
 
 
 
