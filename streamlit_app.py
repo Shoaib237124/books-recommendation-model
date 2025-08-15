@@ -1,11 +1,26 @@
 import streamlit as st
 import pandas as pd
 import pickle
+from huggingface_hub import hf_hub_download
 
 popular_df = pickle.load(open('popular_books.pkl', 'rb'))
 pt = pickle.load(open('books_users_pivot.pkl', 'rb'))
-books = pickle.load(open('Books.pkl', 'rb'))
 similarity_scores = pickle.load(open('cosine_similarity.pkl', 'rb'))
+
+@st.cache_resource(show_spinner=False)
+def load_books():
+    repo_id = "MShoaib123/book-recommender-data"
+    local_path = hf_hub_download(
+        repo_id=repo_id,
+        filename="Books.pkl",
+        repo_type="dataset",
+        token=st.secrets["HF_TOKEN"]  # uses stored token
+    )
+    with open(local_path, "rb") as f:
+        books = pickle.load(f)
+    return books
+
+books = load_books()
 
 def recommend(book_name):
     try:
@@ -65,3 +80,4 @@ with tab2:
                 st.warning("No similar books found. Please check the spelling or try another title.")
         else:
             st.error("Please enter a book title.")
+
