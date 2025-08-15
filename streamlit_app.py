@@ -52,7 +52,7 @@ tab1, tab2 = st.tabs(["🏆 Top 50 Books", "🔍 Recommend Books"])
 # Tab 1 - Popular Books
 with tab1:
     st.subheader("Top 50 Most Rated Books")
-    for i in range(0, len(popular_df), 5):  # 5 books per row
+for i in range(0, len(popular_df), 5):  # 5 books per row
     cols = st.columns(5)
     for idx, col in enumerate(cols):
         if i + idx < len(popular_df):
@@ -88,5 +88,6 @@ with tab2:
                 st.warning("No similar books found. Please check the spelling or try another title.")
         else:
             st.error("Please enter a book title.")
+
 
 
