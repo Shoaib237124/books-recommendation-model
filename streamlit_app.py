@@ -52,14 +52,22 @@ tab1, tab2 = st.tabs(["🏆 Top 50 Books", "🔍 Recommend Books"])
 # Tab 1 - Popular Books
 with tab1:
     st.subheader("Top 50 Most Rated Books")
+    for i in range(0, len(popular_df), 5):  # 5 books per row
     cols = st.columns(5)
-    for idx, row in popular_df.iterrows():
-        col = cols[idx % 5]
-        with col:
-            st.image(row['Image-URL-M'], width=120)
-            st.write(f"**{row['Book-Title']}**")
-            st.caption(f"✍️ {row['Book-Author']}")
-            st.write(f"⭐ {round(row['Avg_rating'], 2)} | 🗳 {row['Num_Ratings']} votes")
+    for idx, col in enumerate(cols):
+        if i + idx < len(popular_df):
+            book = popular_df.iloc[i + idx]
+            
+            # Show image only if URL is present
+            if pd.notna(book.get("Image-URL-M", None)) and book["Image-URL-M"].strip() != "":
+                col.image(book["Image-URL-M"], width=120)
+            else:
+                col.write("📚 No Image Available")
+            
+            # Always show book info
+            col.markdown(f"**{book['Book-Title']}**")
+            col.caption(f"Author: {book['Book-Author']}")
+            col.write(f"⭐ {book['avg_rating']:.2f}  |  📈 {book['num_ratings']} ratings")
 
 # Tab 2 - Recommend Books
 with tab2:
@@ -80,4 +88,5 @@ with tab2:
                 st.warning("No similar books found. Please check the spelling or try another title.")
         else:
             st.error("Please enter a book title.")
+
 
