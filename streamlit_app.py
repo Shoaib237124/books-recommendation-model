@@ -1,0 +1,67 @@
+import streamlit as st
+import pandas as pd
+import pickle
+
+popular_df = pickle.load(open('popular_books.pkl', 'rb'))
+pt = pickle.load(open('books_users_pivot.pkl', 'rb'))
+books = pickle.load(open('Books.pkl', 'rb'))
+similarity_scores = pickle.load(open('cosine_similarity.pkl', 'rb'))
+
+def recommend(book_name):
+    try:
+        index = pt.index.get_loc(book_name)
+    except KeyError:
+        return []
+
+    similar_items = sorted(list(enumerate(similarity_scores[index])), 
+                            key=lambda x: x[1], reverse=True)[1:6]
+    data = []
+    for i in similar_items:
+        temp_df = books[books['Book-Title'] == pt.index[i[0]]]
+        data.append({
+            "title": pt.index[i[0]],
+            "author": temp_df['Book-Author'].values[0],
+            "image": temp_df['Image-URL-M'].values[0]
+        })
+    return data
+
+# Streamlit UI
+st.set_page_config(page_title="📚 Book Recommender", layout="wide")
+
+st.title("📚 Book Recommender System")
+st.markdown("A collaborative filtering and popularity-based book recommender system built with Streamlit.")
+
+# Tabs for Navigation
+tab1, tab2 = st.tabs(["🏆 Top 50 Books", "🔍 Recommend Books"])
+
+# Tab 1 - Popular Books
+with tab1:
+    st.subheader("Top 50 Most Rated Books")
+    cols = st.columns(5)
+    for idx, row in popular_df.iterrows():
+        col = cols[idx % 5]
+        with col:
+            st.image(row['Image-URL-M'], width=120)
+            st.write(f"**{row['Book-Title']}**")
+            st.caption(f"✍️ {row['Book-Author']}")
+            st.write(f"⭐ {round(row['Avg_rating'], 2)} | 🗳 {row['Num_Ratings']} votes")
+
+# Tab 2 - Recommend Books
+with tab2:
+    st.subheader("Find Your Next Book ❤️")
+    user_input = st.text_input("Enter a book title:", placeholder="Try: Harry Potter, The Hobbit, 1984...")
+    if st.button("Get Recommendations"):
+        if user_input.strip() != "":
+            results = recommend(user_input.strip())
+            if results:
+                rec_cols = st.columns(5)
+                for idx, book in enumerate(results):
+                    col = rec_cols[idx % 5]
+                    with col:
+                        st.image(book['image'], width=120)
+                        st.write(f"**{book['title']}**")
+                        st.caption(f"✍️ {book['author']}")
+            else:
+                st.warning("No similar books found. Please check the spelling or try another title.")
+        else:
+            st.error("Please enter a book title.")
